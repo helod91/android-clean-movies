@@ -1,9 +1,6 @@
 package com.omdb.cleanmovies.ui.details
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
-import androidx.lifecycle.switchMap
+import com.omdb.cleanmovies.common.BaseViewModel
 import com.omdb.domain.usecases.GetMovieDetails
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
@@ -11,20 +8,24 @@ import kotlinx.coroutines.flow.collectLatest
 @ExperimentalCoroutinesApi
 class MovieDetailsViewModel(
     private val movieDetailsUseCase: GetMovieDetails
-) : ViewModel() {
+) : BaseViewModel<MovieDetailsState, MovieDetailsIntent, MovieDetailsAction>() {
 
-    private val movieId = MutableLiveData<String?>()
-
-    val movieDetailsResult = movieId.switchMap { id ->
-        liveData {
-            movieDetailsUseCase.execute(GetMovieDetails.Params(id))
-                .collectLatest { result ->
-                    emit(result)
-                }
+    override fun intentToAction(intent: MovieDetailsIntent): MovieDetailsAction {
+        return when (intent) {
+            is MovieDetailsIntent.LoadMovieDetails -> MovieDetailsAction.MovieDetails(intent.movieId)
         }
     }
 
-    fun getMovieDetails(id: String?) {
-        movieId.value = id
+    override fun handleAction(action: MovieDetailsAction) {
+        launchOnUI {
+            when (action) {
+                is MovieDetailsAction.MovieDetails -> {
+                    movieDetailsUseCase.execute(GetMovieDetails.Params(action.movieId))
+                        .collectLatest { result ->
+                            state.value = result.reduce()
+                        }
+                }
+            }
+        }
     }
 }

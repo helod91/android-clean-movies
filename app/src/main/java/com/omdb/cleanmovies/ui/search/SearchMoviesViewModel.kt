@@ -1,9 +1,6 @@
 package com.omdb.cleanmovies.ui.search
 
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
-import androidx.lifecycle.switchMap
+import com.omdb.cleanmovies.common.BaseViewModel
 import com.omdb.domain.usecases.SearchMovies
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collectLatest
@@ -11,20 +8,23 @@ import kotlinx.coroutines.flow.collectLatest
 @ExperimentalCoroutinesApi
 class SearchMoviesViewModel(
     private val searchMoviesUseCase: SearchMovies
-) : ViewModel() {
+) : BaseViewModel<SearchMoviesState, SearchMoviesIntent, SearchMoviesAction>() {
 
-    private val movieTitle = MutableLiveData<String?>()
-
-    val searchMoviesResult = movieTitle.switchMap { title ->
-        liveData {
-            searchMoviesUseCase.execute(SearchMovies.Params(title))
-                .collectLatest { result ->
-                    emit(result)
-                }
+    override fun intentToAction(intent: SearchMoviesIntent): SearchMoviesAction {
+        return when (intent) {
+            is SearchMoviesIntent.SearchMovies -> SearchMoviesAction.SearchMovies(intent.query)
         }
     }
 
-    fun searchMovie(title: String?) {
-        movieTitle.value = title
+    override fun handleAction(action: SearchMoviesAction) {
+        launchOnUI {
+            when (action) {
+                is SearchMoviesAction.SearchMovies ->
+                    searchMoviesUseCase.execute(SearchMovies.Params(action.query))
+                        .collectLatest { result ->
+                            state.value = result.reduce()
+                        }
+            }
+        }
     }
 }

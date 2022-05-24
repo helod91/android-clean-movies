@@ -1,6 +1,8 @@
 package com.omdb.cleanmovies.ui.details
 
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import coil.load
 import com.omdb.cleanmovies.common.BaseActivity
 import com.omdb.cleanmovies.databinding.ActivityMovieDetailsBinding
@@ -9,7 +11,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 @ExperimentalCoroutinesApi
-class MovieDetailsActivity : BaseActivity<ActivityMovieDetailsBinding, MovieDetailsViewModel>() {
+class MovieDetailsActivity : BaseActivity<ActivityMovieDetailsBinding, MovieDetailsState,
+        MovieDetailsIntent, MovieDetailsAction, MovieDetailsViewModel>() {
 
     companion object {
         const val FLAG_MOVIE_ID = "MovieDetailsActivity.MovieId"
@@ -22,16 +25,33 @@ class MovieDetailsActivity : BaseActivity<ActivityMovieDetailsBinding, MovieDeta
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        observeSuccess(viewModel.movieDetailsResult, {
-            populateUI(it)
-        }, binding.movieDetailsLoading)
-        viewModel.getMovieDetails(intent.getStringExtra(FLAG_MOVIE_ID))
-
         supportActionBar?.title = intent.getStringExtra(FLAG_MOVIE_TITLE)
+
+        dispatchIntent(MovieDetailsIntent.LoadMovieDetails(intent.getStringExtra(FLAG_MOVIE_ID)))
     }
 
     override fun presentBinding(): ActivityMovieDetailsBinding =
         ActivityMovieDetailsBinding.inflate(layoutInflater)
+
+    override fun render(state: MovieDetailsState) {
+        binding.movieDetailsLoading.isVisible = false
+        binding.movieDetailsEmpty.isVisible = false
+
+        when (state) {
+            is MovieDetailsState.Exception -> {
+                AlertDialog.Builder(this)
+                    .setTitle("Error")
+                    .setMessage(state.error?.message)
+                    .setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
+            }
+            is MovieDetailsState.Loading -> binding.movieDetailsLoading.isVisible = true
+            is MovieDetailsState.ResultEmpty -> binding.movieDetailsEmpty.isVisible = true
+            is MovieDetailsState.ResultMovieDetails -> populateUI(state.data)
+        }
+    }
 
     private fun populateUI(details: MovieDetailsModel?) {
         with(binding) {

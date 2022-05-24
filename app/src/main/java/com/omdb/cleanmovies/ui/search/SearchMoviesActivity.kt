@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AlertDialog
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.omdb.cleanmovies.common.BaseActivity
 import com.omdb.cleanmovies.databinding.ActivitySearchMoviesBinding
@@ -12,7 +14,8 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 @ExperimentalCoroutinesApi
-class SearchMoviesActivity : BaseActivity<ActivitySearchMoviesBinding, SearchMoviesViewModel>() {
+class SearchMoviesActivity :
+    BaseActivity<ActivitySearchMoviesBinding, SearchMoviesState, SearchMoviesIntent, SearchMoviesAction, SearchMoviesViewModel>() {
 
     override val viewModel: SearchMoviesViewModel by viewModel()
 
@@ -27,6 +30,27 @@ class SearchMoviesActivity : BaseActivity<ActivitySearchMoviesBinding, SearchMov
     override fun presentBinding(): ActivitySearchMoviesBinding =
         ActivitySearchMoviesBinding.inflate(layoutInflater)
 
+    override fun render(state: SearchMoviesState) {
+        binding.searchMoviesLoading.isVisible = false
+        binding.searchMoviesEmpty.isVisible = false
+        adapter.data = emptyList()
+
+        when (state) {
+            is SearchMoviesState.Exception -> {
+                AlertDialog.Builder(this)
+                    .setTitle("Error")
+                    .setMessage(state.error?.message)
+                    .setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
+            }
+            is SearchMoviesState.Loading -> binding.searchMoviesLoading.isVisible = true
+            is SearchMoviesState.ResultEmpty -> binding.searchMoviesEmpty.isVisible = true
+            is SearchMoviesState.ResultMovies -> adapter.data = state.data
+        }
+    }
+
     private fun setupSearch() {
         binding.searchMoviesResults.layoutManager = LinearLayoutManager(this)
         binding.searchMoviesResults.adapter = adapter
@@ -37,7 +61,7 @@ class SearchMoviesActivity : BaseActivity<ActivitySearchMoviesBinding, SearchMov
                     getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
 
-                viewModel.searchMovie(binding.searchMoviesTitleInput.text.toString())
+                dispatchIntent(SearchMoviesIntent.SearchMovies(binding.searchMoviesTitleInput.text.toString()))
             }
 
             actionId == EditorInfo.IME_ACTION_SEARCH
@@ -50,9 +74,5 @@ class SearchMoviesActivity : BaseActivity<ActivitySearchMoviesBinding, SearchMov
 
             startActivity(openMovieDetails)
         }
-
-        observeSuccess(viewModel.searchMoviesResult, {
-            adapter.data = it?.movies
-        }, binding.searchMoviesLoading)
     }
 }

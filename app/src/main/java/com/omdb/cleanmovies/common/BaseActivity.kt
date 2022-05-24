@@ -2,18 +2,11 @@ package com.omdb.cleanmovies.common
 
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
-import android.widget.ProgressBar
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.viewbinding.ViewBinding
-import com.omdb.domain.models.Data
-import com.omdb.domain.models.Status
 
-abstract class BaseActivity<V : ViewBinding, M : ViewModel> : AppCompatActivity() {
+abstract class BaseActivity<V : ViewBinding, STATE : ViewState, INTENT : ViewIntent,
+        ACTION : ViewAction, M : BaseViewModel<STATE, INTENT, ACTION>> : AppCompatActivity() {
 
     protected lateinit var binding: V
 
@@ -23,6 +16,8 @@ abstract class BaseActivity<V : ViewBinding, M : ViewModel> : AppCompatActivity(
 
     abstract fun presentBinding(): V
 
+    abstract fun render(state: STATE)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -31,6 +26,8 @@ abstract class BaseActivity<V : ViewBinding, M : ViewModel> : AppCompatActivity(
         supportActionBar?.setDisplayHomeAsUpEnabled(showBackButton)
 
         setContentView(binding.root)
+
+        viewModel.state.observe(this) { render(it) }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -41,27 +38,7 @@ abstract class BaseActivity<V : ViewBinding, M : ViewModel> : AppCompatActivity(
         return super.onOptionsItemSelected(item)
     }
 
-    protected fun <RequestData> observeSuccess(
-        liveData: LiveData<Data<RequestData>>,
-        successAction: (result: RequestData?) -> Unit,
-        progress: ProgressBar? = null
-    ) {
-        liveData.observe(this, Observer {
-            progress?.visibility = View.GONE
-
-            when (it.responseType) {
-                Status.LOADING -> progress?.visibility = View.VISIBLE
-                Status.SUCCESSFUL -> successAction.invoke(it.data)
-                Status.ERROR ->
-                    AlertDialog.Builder(this)
-                        .setTitle("Error")
-                        .setMessage(it.error?.message)
-                        .setPositiveButton("OK") { dialog, _ ->
-                            dialog.dismiss()
-                        }
-                        .show()
-
-            }
-        })
+    protected fun dispatchIntent(intent: INTENT) {
+        viewModel.dispatchIntent(intent)
     }
 }
