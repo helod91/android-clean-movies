@@ -2,6 +2,7 @@ package com.omdb.cleanmovies.common
 
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
 
@@ -36,6 +37,16 @@ abstract class BaseActivity<V : ViewBinding, STATE : ViewState, INTENT : ViewInt
             return true
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    protected fun showGenericError() {
+        AlertDialog.Builder(this)
+            .setTitle("Error")
+            .setMessage("Something went wrong")
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     protected fun dispatchIntent(intent: INTENT) {

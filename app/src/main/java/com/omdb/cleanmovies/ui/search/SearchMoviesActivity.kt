@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,24 +37,10 @@ class SearchMoviesActivity :
         adapter.data = emptyList()
 
         when (state) {
-            is SearchMoviesState.RandomError -> {
-                AlertDialog.Builder(this)
-                    .setTitle("Error")
-                    .setMessage("A random error has been forced on you!")
-                    .setPositiveButton("OK") { dialog, _ ->
-                        dialog.dismiss()
-                    }
+            is SearchMoviesState.RandomError ->
+                Toast.makeText(this, "A random error has been forced on you!", Toast.LENGTH_SHORT)
                     .show()
-            }
-            is SearchMoviesState.UnhandledError -> {
-                AlertDialog.Builder(this)
-                    .setTitle("Error")
-                    .setMessage("Something went wrong")
-                    .setPositiveButton("OK") { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .show()
-            }
+            is SearchMoviesState.UnhandledError -> showGenericError()
             is SearchMoviesState.Loading -> binding.searchMoviesLoading.isVisible = true
             is SearchMoviesState.ResultEmpty -> binding.searchMoviesEmpty.isVisible = true
             is SearchMoviesState.ResultMovies -> adapter.data = state.data
