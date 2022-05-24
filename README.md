@@ -10,8 +10,6 @@ A sample movie database app utilizing clean architecture
 - Presentation layer with MVVM pattern
 - Coil for image loading
 
-#### [Click here for the Rx version of this sample](https://innersource.accenture.com/projects/MXO/repos/android-clean-movies/browse?at=refs%2Fheads%2Fclean-rx)
-
 ### Steps to run
 
 - Reuqest a free API key from http://www.omdbapi.com
