@@ -38,10 +38,10 @@ class MovieDetailsActivity : BaseActivity<ActivityMovieDetailsBinding, MovieDeta
         binding.movieDetailsEmpty.isVisible = false
 
         when (state) {
-            is MovieDetailsState.Exception -> {
+            is MovieDetailsState.GenericError -> {
                 AlertDialog.Builder(this)
                     .setTitle("Error")
-                    .setMessage(state.error?.message)
+                    .setMessage("Something went wrong")
                     .setPositiveButton("OK") { dialog, _ ->
                         dialog.dismiss()
                     }

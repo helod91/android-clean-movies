@@ -32,7 +32,6 @@ android {
 dependencies {
     api project(":domain")
 
-    api retrofit
     api retrofitGsonConverter
     api retrofitLoggingInterceptors
     api koin

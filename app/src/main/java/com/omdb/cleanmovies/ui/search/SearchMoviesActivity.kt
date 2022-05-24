@@ -36,10 +36,19 @@ class SearchMoviesActivity :
         adapter.data = emptyList()
 
         when (state) {
-            is SearchMoviesState.Exception -> {
+            is SearchMoviesState.RandomError -> {
                 AlertDialog.Builder(this)
                     .setTitle("Error")
-                    .setMessage(state.error?.message)
+                    .setMessage("A random error has been forced on you!")
+                    .setPositiveButton("OK") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
+            }
+            is SearchMoviesState.UnhandledError -> {
+                AlertDialog.Builder(this)
+                    .setTitle("Error")
+                    .setMessage("Something went wrong")
                     .setPositiveButton("OK") { dialog, _ ->
                         dialog.dismiss()
                     }

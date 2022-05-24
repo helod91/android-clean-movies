@@ -1,6 +1,7 @@
 package com.omdb.domain.usecases
 
 import com.omdb.domain.models.Data
+import com.omdb.domain.models.error.DomainException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 
@@ -15,7 +16,7 @@ abstract class UseCase<Params, Result> {
         }.onStart {
             emit(Data.loading())
         }.catch { exception ->
-            emit(Data.error(exception))
+            emit(Data.error(DomainException.parseThrowable(exception)))
         }
     }
 }

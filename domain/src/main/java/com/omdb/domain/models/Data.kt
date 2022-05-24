@@ -1,23 +1,25 @@
 package com.omdb.domain.models
 
-data class Data<RequestData>(
+import com.omdb.domain.models.error.DomainException
+
+data class Data<ResultData>(
     val responseType: Status,
-    val data: RequestData? = null,
-    val error: Error? = null
+    val data: ResultData? = null,
+    val domainException: DomainException? = null
 ) {
     companion object {
-        fun <RequestData> loading(): Data<RequestData> {
+        fun <ResultData> loading(): Data<ResultData> {
             return Data(Status.LOADING)
         }
 
-        fun <RequestData> error(throwable: Throwable): Data<RequestData> {
+        fun <ResultData> error(domainException: DomainException): Data<ResultData> {
             return Data(
                 responseType = Status.ERROR,
-                error = Error(throwable.localizedMessage)
+                domainException = domainException
             )
         }
 
-        fun <RequestData> success(data: RequestData): Data<RequestData> {
+        fun <ResultData> success(data: ResultData): Data<ResultData> {
             return Data(
                 responseType = Status.SUCCESSFUL,
                 data = data

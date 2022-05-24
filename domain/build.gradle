@@ -6,4 +6,5 @@ targetCompatibility = "7"
 dependencies {
     api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     api coroutines
+    api retrofit
 }
