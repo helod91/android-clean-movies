@@ -8,10 +8,10 @@ import org.koin.dsl.module
 @ExperimentalCoroutinesApi
 val useCaseModules = module {
     factory {
-        SearchMovies(get())
+        SearchMovies(get(), get())
     }
 
     factory {
-        GetMovieDetails(get())
+        GetMovieDetails(get(), get())
     }
 }

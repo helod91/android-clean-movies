@@ -42,6 +42,7 @@ class MovieDetailsActivity : BaseActivity<ActivityMovieDetailsBinding, MovieDeta
             is MovieDetailsState.Loading -> binding.movieDetailsLoading.isVisible = true
             is MovieDetailsState.ResultEmpty -> binding.movieDetailsEmpty.isVisible = true
             is MovieDetailsState.ResultMovieDetails -> populateUI(state.data)
+            MovieDetailsState.NoInternetConnection -> showAlertDialog("No internet connection.")
         }
     }
 
@@ -57,5 +58,15 @@ class MovieDetailsActivity : BaseActivity<ActivityMovieDetailsBinding, MovieDeta
             movieDetailsActors.text = "Actors: ${details?.actors}"
             movieDetailsPlot.text = details?.plot
         }
+    }
+
+    private fun showAlertDialog(message: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Error")
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 }

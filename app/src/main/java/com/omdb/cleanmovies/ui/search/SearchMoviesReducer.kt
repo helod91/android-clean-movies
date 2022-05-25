@@ -13,6 +13,8 @@ fun Data<MovieSearchResultModel>.reduce(): SearchMoviesState {
        Status.ERROR -> {
            when (domainException?.code) {
                DomainErrorCode.TEST_ERROR -> SearchMoviesState.RandomError
+               DomainErrorCode.NO_INTERNET_CONNECTION -> SearchMoviesState.NoInternetConnection
+               DomainErrorCode.NO_INPUT -> SearchMoviesState.NoInputProvided
                else -> SearchMoviesState.UnhandledError
            }
        }

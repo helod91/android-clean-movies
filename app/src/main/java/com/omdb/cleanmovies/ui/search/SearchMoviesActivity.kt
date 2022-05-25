@@ -44,6 +44,8 @@ class SearchMoviesActivity :
             is SearchMoviesState.Loading -> binding.searchMoviesLoading.isVisible = true
             is SearchMoviesState.ResultEmpty -> binding.searchMoviesEmpty.isVisible = true
             is SearchMoviesState.ResultMovies -> adapter.data = state.data
+            is SearchMoviesState.NoInputProvided -> showAlertDialog("Please provide a title to search for.")
+            is SearchMoviesState.NoInternetConnection -> showAlertDialog("No internet connection.")
         }
     }
 
@@ -70,5 +72,15 @@ class SearchMoviesActivity :
 
             startActivity(openMovieDetails)
         }
+    }
+
+    private fun showAlertDialog(message: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Error")
+            .setMessage(message)
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 }

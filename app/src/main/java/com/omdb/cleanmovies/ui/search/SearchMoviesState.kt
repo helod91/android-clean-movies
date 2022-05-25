@@ -9,5 +9,7 @@ sealed class SearchMoviesState : ViewState {
     object ResultEmpty : SearchMoviesState()
     object RandomError: SearchMoviesState()
     object UnhandledError: SearchMoviesState()
+    object NoInternetConnection: SearchMoviesState()
+    object NoInputProvided: SearchMoviesState()
     data class ResultMovies(val data: List<MovieSearchModel>): SearchMoviesState()
 }
